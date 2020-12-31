@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 #include <uWS/uWS.h>
 #include <iostream>
 #include "json.hpp"
@@ -16,10 +16,10 @@ using json = nlohmann::json;
 // Checks if the SocketIO event has JSON data.
 // If there is data the JSON object in string format will be returned,
 // else the empty string "" will be returned.
-string hasData(string s) {
+string hasData(const string& s) {
   auto found_null = s.find("null");
-  auto b1 = s.find_first_of("[");
-  auto b2 = s.find_first_of("]");
+  auto b1 = s.find_first_of('[');
+  auto b2 = s.find_first_of(')');
   if (found_null != string::npos) {
     return "";
   }
@@ -46,10 +46,10 @@ int main() {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
-    if (length && length > 2 && data[0] == '4' && data[1] == '2') {
+    if (length > 2 && data[0] == '4' && data[1] == '2') {
       auto s = hasData(string(data));
 
-      if (s != "") {
+      if (!s.empty()) {
         auto j = json::parse(s);
 
         string event = j[0].get<string>();
@@ -67,7 +67,7 @@ int main() {
           string sensor_type;
           iss >> sensor_type;
 
-          if (sensor_type.compare("L") == 0) {
+          if (sensor_type == "L") {
             meas_package.sensor_type_ = MeasurementPackage::LASER;
             meas_package.raw_measurements_ = VectorXd(2);
             float px;
@@ -77,7 +77,7 @@ int main() {
             meas_package.raw_measurements_ << px, py;
             iss >> timestamp;
             meas_package.timestamp_ = timestamp;
-          } else if (sensor_type.compare("R") == 0) {
+          } else if (sensor_type == "R") {
             meas_package.sensor_type_ = MeasurementPackage::RADAR;
             meas_package.raw_measurements_ = VectorXd(3);
             float ro;
@@ -110,7 +110,7 @@ int main() {
           // Call ProcessMeasurement(meas_package) for Kalman filter
           fusionEKF.ProcessMeasurement(meas_package);       
 
-          // Push the current estimated x,y positon from the Kalman filter's 
+          // Push the current estimated x,y position from the Kalman filter's
           //   state vector
 
           VectorXd estimate(4);
@@ -150,11 +150,11 @@ int main() {
 
   }); // end h.onMessage
 
-  h.onConnection([&h](uWS::WebSocket<uWS::SERVER> ws, uWS::HttpRequest req) {
+  h.onConnection([](uWS::WebSocket<uWS::SERVER> ws, uWS::HttpRequest req) {
     std::cout << "Connected!!!" << std::endl;
   });
 
-  h.onDisconnection([&h](uWS::WebSocket<uWS::SERVER> ws, int code, 
+  h.onDisconnection([](uWS::WebSocket<uWS::SERVER> ws, int code,
                          char *message, size_t length) {
     ws.close();
     std::cout << "Disconnected" << std::endl;
