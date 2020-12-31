@@ -43,7 +43,7 @@ FusionEKF::FusionEKF() {
 /**
  * Destructor.
  */
-FusionEKF::~FusionEKF() {}
+FusionEKF::~FusionEKF() = default;
 
 void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   /**
